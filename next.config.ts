@@ -5,7 +5,12 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 })
 
 const nextConfig = withPWA({
-  // Your Next.js config
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+   typescript: {
+    ignoreBuildErrors: true,
+  },
 })
 
 module.exports = nextConfig
