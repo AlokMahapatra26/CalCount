@@ -26,14 +26,14 @@ export default function HomePage() {
     const userProfile = StorageManager.getUserProfile();
     const allFoods = StorageManager.getFoodItems();
     const allEntries = StorageManager.getFoodEntries();
-    
+
     setProfile(userProfile);
     setFoods(allFoods);
-    
+
     if (userProfile) {
       setGoals(calculateNutritionGoals(userProfile));
     }
-    
+
     const todaysEntries = allEntries.filter(entry => entry.date === today);
     setTodayEntries(todaysEntries);
   }, [today]);
@@ -42,7 +42,7 @@ export default function HomePage() {
     return todayEntries.reduce((totals, entry) => {
       const food = foods.find(f => f.id === entry.foodId);
       if (!food) return totals;
-      
+
       const multiplier = entry.quantity / 100;
       return {
         calories: totals.calories + (food.caloriesPer100g * multiplier),
@@ -59,80 +59,80 @@ export default function HomePage() {
   };
 
   const totals = calculateDailyTotals();
-  
+
   if (!profile) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] p-6">
-      <div className="w-full max-w-sm space-y-6">
-        {/* Icon/Logo Area */}
-        <div className="flex justify-center">
-          <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center">
-            <svg
-              className="w-10 h-10 text-primary-foreground"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-          </div>
-        </div>
-
-        {/* Welcome Content */}
-        <div className="text-center space-y-3">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Welcome to Calcount
-          </h1>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Start your wellness journey by creating your personal profile. 
-            We&apos;ll calculate your nutrition goals and help you track your progress.
-          </p>
-        </div>
-
-        {/* Action Button */}
-        <Button asChild className="w-full h-11">
-          <Link href="/profile" className="flex items-center justify-center gap-2">
-            Get Started
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          </Link>
-        </Button>
-
-        {/* Feature Highlights */}
-        <div className="grid grid-cols-2 gap-4 pt-4">
-          <div className="text-center">
-            <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mx-auto mb-2">
-              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] p-6">
+        <div className="w-full max-w-sm space-y-6">
+          {/* Icon/Logo Area */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center">
+              <svg
+                className="w-10 h-10 text-primary-foreground"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
               </svg>
             </div>
-            <p className="text-xs text-muted-foreground">Track Progress</p>
           </div>
-          <div className="text-center">
-            <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mx-auto mb-2">
-              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+
+          {/* Welcome Content */}
+          <div className="text-center space-y-3">
+            <h1 className="text-2xl font-bold tracking-tight">
+              Welcome to Calcount
+            </h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Start your wellness journey by creating your personal profile.
+              We&apos;ll calculate your nutrition goals and help you track your progress.
+            </p>
+          </div>
+
+          {/* Action Button */}
+          <Button asChild className="w-full h-11">
+            <Link href="/profile" className="flex items-center justify-center gap-2">
+              Get Started
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
               </svg>
+            </Link>
+          </Button>
+
+          {/* Feature Highlights */}
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <div className="text-center">
+              <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <p className="text-xs text-muted-foreground">Track Progress</p>
             </div>
-            <p className="text-xs text-muted-foreground">Set Goals</p>
-          </div>
-          {/* <div className="text-center">
+            <div className="text-center">
+              <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <p className="text-xs text-muted-foreground">Set Goals</p>
+            </div>
+            {/* <div className="text-center">
             <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mx-auto mb-2">
               <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -140,11 +140,11 @@ export default function HomePage() {
             </div>
             <p className="text-xs text-muted-foreground">Stay Healthy</p>
           </div> */}
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 
   return (
@@ -166,13 +166,23 @@ export default function HomePage() {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>{Math.round(totals.calories)}</span>
+                  <span className={Math.round(totals.calories) > goals.calories ? 'text-destructive font-semibold' : ''}>
+                    {Math.round(totals.calories)}
+                  </span>
                   <span className="text-muted-foreground">/ {goals.calories}</span>
                 </div>
-                <Progress value={(totals.calories / goals.calories) * 100} />
+                <Progress
+                  value={(totals.calories / goals.calories) * 100}
+                  className={
+                    totals.calories > goals.calories
+                      ? '[&>*]:bg-destructive'
+                      : ''
+                  }
+                />
               </div>
             </CardContent>
           </Card>
+
 
           <Card>
             <CardHeader className="pb-2">
@@ -235,10 +245,10 @@ export default function HomePage() {
               {todayEntries.map(entry => {
                 const food = foods.find(f => f.id === entry.foodId);
                 if (!food) return null;
-                
+
                 const multiplier = entry.quantity / 100;
                 const calories = Math.round(food.caloriesPer100g * multiplier);
-                
+
                 return (
                   <div key={entry.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <div className="flex-1">
@@ -269,7 +279,7 @@ export default function HomePage() {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         foods={foods}
-        onEntryAdded={(entry:any) => {
+        onEntryAdded={(entry: any) => {
           setTodayEntries(prev => [...prev, entry]);
         }}
       />
