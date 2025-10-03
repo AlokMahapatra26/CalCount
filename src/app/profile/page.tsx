@@ -1,3 +1,4 @@
+// profile/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,11 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Download, Trash2 } from 'lucide-react';
+import { AlertCircle, Download, Trash2, Edit2, Save, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StorageManager } from '@/lib/storage';
 import { calculateBMI, calculateNutritionGoals } from '@/lib/calculations';
-import { UserProfile } from '@/lib/types';
+import { UserProfile, NutritionGoals } from '@/lib/types';
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
@@ -25,6 +26,13 @@ export default function ProfilePage() {
     goal: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isEditingGoals, setIsEditingGoals] = useState(false);
+  const [manualGoals, setManualGoals] = useState<NutritionGoals>({
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  });
 
   useEffect(() => {
     const userProfile = StorageManager.getUserProfile();
@@ -38,6 +46,9 @@ export default function ProfilePage() {
         lifestyle: userProfile.lifestyle,
         goal: userProfile.goal
       });
+      
+      const goals = calculateNutritionGoals(userProfile);
+      setManualGoals(goals);
     }
   }, []);
 
@@ -73,14 +84,67 @@ export default function ProfilePage() {
       lifestyle: formData.lifestyle as UserProfile['lifestyle'],
       goal: formData.goal as UserProfile['goal'],
       createdAt: profile?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      manualGoals: profile?.manualGoals
     };
 
     StorageManager.saveUserProfile(profileData);
     setProfile(profileData);
     
+    // Recalculate goals if not manual
+    if (!profileData.manualGoals) {
+      const newGoals = calculateNutritionGoals(profileData);
+      setManualGoals(newGoals);
+    }
+    
     toast.success("Profile saved successfully", {
       description: "Your nutrition goals have been updated."
+    });
+  };
+
+  const handleSaveManualGoals = () => {
+    if (!profile) return;
+
+    if (manualGoals.calories < 1000 || manualGoals.calories > 5000) {
+      toast.error("Invalid calories", {
+        description: "Calories must be between 1000 and 5000"
+      });
+      return;
+    }
+
+    const updatedProfile: UserProfile = {
+      ...profile,
+      manualGoals: { ...manualGoals, isManual: true },
+      updatedAt: new Date().toISOString()
+    };
+
+    StorageManager.saveUserProfile(updatedProfile);
+    setProfile(updatedProfile);
+    setIsEditingGoals(false);
+    
+    toast.success("Custom nutrition goals saved", {
+      description: "Your manual goals have been applied."
+    });
+  };
+
+  const handleResetToCalculated = () => {
+    if (!profile) return;
+
+    const updatedProfile: UserProfile = {
+      ...profile,
+      manualGoals: undefined,
+      updatedAt: new Date().toISOString()
+    };
+
+    StorageManager.saveUserProfile(updatedProfile);
+    setProfile(updatedProfile);
+    
+    const calculatedGoals = calculateNutritionGoals(updatedProfile);
+    setManualGoals(calculatedGoals);
+    setIsEditingGoals(false);
+    
+    toast.success("Reset to calculated goals", {
+      description: "Goals are now based on your profile."
     });
   };
 
@@ -112,9 +176,9 @@ export default function ProfilePage() {
         goal: ''
       });
       
-    toast.error("All data cleared", {
-      description: "Your nutrition data has been completely removed."
-    });
+      toast.error("All data cleared", {
+        description: "Your nutrition data has been completely removed."
+      });
     }
   };
 
@@ -217,9 +281,10 @@ export default function ProfilePage() {
                 <SelectValue placeholder="Select your goal" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="lose">Lose Weight</SelectItem>
+                <SelectItem value="lose">Lose Weight (-500 cal deficit)</SelectItem>
                 <SelectItem value="maintain">Maintain Weight</SelectItem>
-                <SelectItem value="gain">Gain Weight</SelectItem>
+                <SelectItem value="gain">Gain Weight (+500 cal surplus)</SelectItem>
+                <SelectItem value="gain_muscle">Gain Muscle (+300 cal, high protein)</SelectItem>
               </SelectContent>
             </Select>
             {errors.goal && (
@@ -276,27 +341,124 @@ export default function ProfilePage() {
       {goals && (
         <Card>
           <CardHeader>
-            <CardTitle>Daily Nutrition Goals</CardTitle>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CardTitle>Daily Nutrition Goals</CardTitle>
+                {goals.isManual && (
+                  <Badge variant="outline">Custom</Badge>
+                )}
+              </div>
+              {!isEditingGoals ? (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsEditingGoals(true)}
+                >
+                  <Edit2 className="w-4 h-4 mr-1" />
+                  Edit
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      setIsEditingGoals(false);
+                      setManualGoals(goals);
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={handleSaveManualGoals}
+                  >
+                    <Save className="w-4 h-4 mr-1" />
+                    Save
+                  </Button>
+                </div>
+              )}
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-3 bg-muted rounded-lg">
-                <div className="text-2xl font-bold text-primary">{goals.calories}</div>
+                {isEditingGoals ? (
+                  <Input
+                    type="number"
+                    value={manualGoals.calories}
+                    onChange={(e) => setManualGoals(prev => ({ 
+                      ...prev, 
+                      calories: parseInt(e.target.value) || 0 
+                    }))}
+                    className="text-center text-2xl font-bold"
+                  />
+                ) : (
+                  <div className="text-2xl font-bold text-primary">{goals.calories}</div>
+                )}
                 <div className="text-sm text-muted-foreground">Calories</div>
               </div>
               <div className="text-center p-3 bg-muted rounded-lg">
-                <div className="text-2xl font-bold text-primary">{goals.protein}g</div>
+                {isEditingGoals ? (
+                  <Input
+                    type="number"
+                    value={manualGoals.protein}
+                    onChange={(e) => setManualGoals(prev => ({ 
+                      ...prev, 
+                      protein: parseInt(e.target.value) || 0 
+                    }))}
+                    className="text-center text-2xl font-bold"
+                  />
+                ) : (
+                  <div className="text-2xl font-bold text-primary">{goals.protein}g</div>
+                )}
                 <div className="text-sm text-muted-foreground">Protein</div>
               </div>
               <div className="text-center p-3 bg-muted rounded-lg">
-                <div className="text-2xl font-bold text-primary">{goals.carbs}g</div>
+                {isEditingGoals ? (
+                  <Input
+                    type="number"
+                    value={manualGoals.carbs}
+                    onChange={(e) => setManualGoals(prev => ({ 
+                      ...prev, 
+                      carbs: parseInt(e.target.value) || 0 
+                    }))}
+                    className="text-center text-2xl font-bold"
+                  />
+                ) : (
+                  <div className="text-2xl font-bold text-primary">{goals.carbs}g</div>
+                )}
                 <div className="text-sm text-muted-foreground">Carbs</div>
               </div>
               <div className="text-center p-3 bg-muted rounded-lg">
-                <div className="text-2xl font-bold text-primary">{goals.fat}g</div>
+                {isEditingGoals ? (
+                  <Input
+                    type="number"
+                    value={manualGoals.fat}
+                    onChange={(e) => setManualGoals(prev => ({ 
+                      ...prev, 
+                      fat: parseInt(e.target.value) || 0 
+                    }))}
+                    className="text-center text-2xl font-bold"
+                  />
+                ) : (
+                  <div className="text-2xl font-bold text-primary">{goals.fat}g</div>
+                )}
                 <div className="text-sm text-muted-foreground">Fat</div>
               </div>
             </div>
+
+            {goals.isManual && !isEditingGoals && (
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleResetToCalculated}
+              >
+                Reset to Calculated Goals
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}

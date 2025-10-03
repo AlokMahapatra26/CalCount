@@ -5,16 +5,17 @@ export interface UserProfile {
   height: number; // in cm
   weight: number; // in kg
   lifestyle: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-  goal: 'lose' | 'maintain' | 'gain';
+  goal: 'lose' | 'maintain' | 'gain' | 'gain_muscle';
   createdAt: string;
   updatedAt: string;
+  manualGoals?: NutritionGoals; // Optional manual override
 }
-
 export interface NutritionGoals {
   calories: number;
   protein: number; // in grams
   carbs: number; // in grams
   fat: number; // in grams
+  isManual?: boolean; // Track if goals are manually set
 }
 
 export interface FoodItem {
